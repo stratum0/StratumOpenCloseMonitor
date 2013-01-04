@@ -861,7 +861,7 @@ supybot.plugins.Services.NickServ: NickServ
 # Default value: 
 ###
 supybot.plugins.Services.NickServ.password: 
-supybot.plugins.Services.NickServ.password.StratumGuardian: {{{PASSWORD}}}
+supybot.plugins.Services.NickServ.password.StratumGuardian: snahYo8ahthae5Ahn
 
 ###
 # Determines what nick the 'ChanServ' service has.
