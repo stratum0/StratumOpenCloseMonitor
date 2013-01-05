@@ -79,15 +79,21 @@ Supybot will write its output to supybot/logs/messages.log.
  -- then, for both cases --
 # chown root:root /etc/cron.d/stratummonitor
 
-7. For the detection of present entities in the hackerspace, create the file
-   /etc/stratummonitor/known-users, and fill it with a mapping of MAC addresses
-   to IRC nick names. The file must contain one mapping per line, each line
-   consists of a MAC address, the '=>' string and the nick name of the
-   corresponding user. A sample of this file looks as following:
+7. For the detection of present entities in the hackerspace, create the files
+   /etc/stratummonitor/known-users and /etc/stratummonitor/known-mdns, and fill
+   them with a mapping of MAC addresses resp. mDNS hostnames (without the domain
+   postfix) to IRC nick names. The file must contain one mapping per line, each
+   line consists of a MAC address or hostname, the '=>' string and the nick name
+   of the corresponding user. A sample of this files looks as following:
 
+   /etc/stratummonitor/known-users:
      08:24:15:db:2b:56 => AcidBurn
      00:10:35:bc:a5:11 => ZeroCool
      DE:AD:BE:EF:13:37 => JRandomHacker
+
+   /etc/stratummonitor/known-mdns:
+     r2d2 => ZeroCool
+     c3po => JRandomHacker
 
    This file is read by Supybot, and every user who is currently present on the
    LAN will be given voice in the IRC channel.

@@ -67,6 +67,7 @@ class StratumMonitor(callbacks.Plugin):
   API_TEXT_FILE = API_PATH % "status.txt"
   API_TEXT_TEMPLATE ="""Version: {{{VERSION}}}\r
 IsOpen: {{{ISOPEN}}}\r
+OpenedBy: {{{OPENER}}}\r
 Since: {{{SINCE}}}\r
 """
   # one file for Stratum 0 Open/Close Monitor API and Hackerspaces.nl Space API
@@ -77,6 +78,7 @@ Since: {{{SINCE}}}\r
   "version": "{{{VERSION}}}",\r
   "isOpen": {{{ISOPEN}}},\r
   "since": "{{{SINCE}}}",\r
+  "openedBy": "{{{OPENER}}}",\r
   \r
   "api": "0.12",\r
   "space": "Stratum 0",\r
@@ -104,6 +106,7 @@ Since: {{{SINCE}}}\r
   API_XML_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r
 <status version="{{{VERSION}}}">\r
   <isOpen>{{{ISOPEN}}}</isOpen>\r
+  <openedBy>{{{OPENER}}}</openedBy>\r
   <since>{{{SINCE}}}</since>\r
 </status>\r
 """
@@ -120,6 +123,7 @@ Since: {{{SINCE}}}\r
     self.__parent.__init__(irc)
 
     self.isOpen = False
+    self.openedBy = ""
     self.since = datetime.now()
     self.presentEntities = None
     self.lastCalled = int(time.time())
@@ -128,8 +132,17 @@ Since: {{{SINCE}}}\r
     self.readMACs()
 
   def readMACs(self):
+    knownMDNSs = {};
     knownMACs = {};
     self.presentEntities = ircutils.IrcSet()
+
+    f = open("/etc/stratummonitor/known-mdns", "r")
+    for line in f.readlines():
+      parts = line.split("=>")
+      if(len(parts) == 2):
+        knownMDNSs[parts[0].strip().lower()] = parts[1].strip()
+    f.close()
+    self.log.info("Known mDNS hostnames: %s" % repr(knownMDNSs))
 
     f = open("/etc/stratummonitor/known-users", "r")
     for line in f.readlines():
@@ -137,16 +150,27 @@ Since: {{{SINCE}}}\r
       if(len(parts) == 2):
         knownMACs[parts[0].strip().lower()] = parts[1].strip()
     f.close()
-    #print repr(knownMACs)
+    self.log.info("Known MACs: %s" % repr(knownMACs))
+
+    f = open("/var/run/stratummonitor-mdnsscan", "r")
+    for line in f.readlines():
+      scannedMDNS = line.strip().lower()
+      self.log.info("got mDNS hostname %s" % scannedMDNS)
+      if(scannedMDNS in knownMDNSs.keys()):
+        self.log.info("  this mDNS hostname belongs to user %s" % knownMDNSs[scannedMDNS])
+        self.presentEntities.add(knownMDNSs[scannedMDNS])
+    f.close()
+    self.log.info("Present mDNSs: %s" % repr(self.presentEntities))
 
     f = open("/var/run/stratummonitor-netscan", "r")
     for line in f.readlines():
       scannedMAC = line.strip().lower()
+      self.log.info("got mac address %s" % scannedMAC)
       if(scannedMAC in knownMACs.keys()):
-        #print "found mac address %s, belongs to user %s" % (scannedMAC,knownMACs[scannedMAC])
+        self.log.info("  this mac address belongs to user %s" % knownMACs[scannedMAC])
         self.presentEntities.add(knownMACs[scannedMAC])
     f.close()
-    #print repr(self.presentEntities)
+    self.log.info("Present MACs: %s" % repr(self.presentEntities))
 
   def __call__(self, irc, msg):
     # only re-read the file every 60 seconds
@@ -154,19 +178,19 @@ Since: {{{SINCE}}}\r
       self.readMACs()
       self.lastCalled = int(time.time())
 
-    chan = msg.args[0];      # FIXME: change channel!
-    if(ircutils.isChannel(chan) and chan == "#stratum0" and
-       chan in irc.state.channels.keys()):
-      #print "voices:  %s" % repr(irc.state.channels[chan].voices)
-      #print "present: %s" % repr(self.presentEntities)
-      #print "devoice  %s" % repr(irc.state.channels[chan].voices - self.presentEntities)
-      #print "voice:   %s" % repr(self.presentEntities - irc.state.channels[chan].voices)
+      chan = msg.args[0];      # FIXME: change channel!
+      if(ircutils.isChannel(chan) and chan == "#stratum0" and
+         chan in irc.state.channels.keys()):
+        self.log.info("voices:  %s" % repr(irc.state.channels[chan].voices))
+        self.log.info("present: %s" % repr(self.presentEntities))
+        self.log.info("devoice  %s" % repr(irc.state.channels[chan].voices - self.presentEntities))
+        self.log.info("voice:   %s\n" % repr(self.presentEntities - irc.state.channels[chan].voices))
 
-      for nick in (irc.state.channels[chan].voices - self.presentEntities):
-        irc.queueMsg(ircmsgs.devoice(chan, nick))
+        for nick in (irc.state.channels[chan].voices - self.presentEntities):
+          irc.queueMsg(ircmsgs.devoice(chan, nick))
 
-      for nick in (self.presentEntities - irc.state.channels[chan].voices):
-        irc.queueMsg(ircmsgs.voice(chan, nick))
+        for nick in (self.presentEntities - irc.state.channels[chan].voices):
+          irc.queueMsg(ircmsgs.voice(chan, nick))
 
   def presentEntities(self, irc, msg, args):
     irc.reply(", ".join(self.presentEntities), prefixNick=False)
@@ -184,6 +208,7 @@ Since: {{{SINCE}}}\r
     text = text.replace("{{{ISOPEN}}}", "true" if self.isOpen else "false")
     text = text.replace("{{{STATUS}}}", "open" if self.isOpen else "closed")
     text = text.replace("{{{ACTION}}}", "Opened" if self.isOpen else "Closed")
+    text = text.replace("{{{OPENER}}}", self.openedBy)
     return text
 
   def writeFile(self, filename, template, append=False):
@@ -216,10 +241,10 @@ Since: {{{SINCE}}}\r
     """
     self.since = datetime.now()
     self.isOpen = True;
+    self.openedBy = nick if nick else msg.nick
     self.writeFiles()
-    n = nick if nick else msg.nick
     irc.reply("Space ist offen (%s, %s)" %
-      (self.topicTimeString(self.since), n), prefixNick = False)
+      (self.topicTimeString(self.since), self.openedBy), prefixNick = False)
 
   spaceopen = wrap(spaceopen, [optional('text')])
 
@@ -236,6 +261,7 @@ Since: {{{SINCE}}}\r
     """
     self.since = datetime.now()
     self.isOpen = False;
+    self.openedBy = ""
     self.writeFiles()
     irc.reply("Space ist zu (%s)" % self.topicTimeString(self.since),
       prefixNick = False)
