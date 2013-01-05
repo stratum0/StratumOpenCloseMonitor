@@ -1,8 +1,12 @@
-www/status.json
-www/status.txt
-www/status.xml
 *.pyc
 # vim swap files
 .*.sw*
-www/.htaccess
 server/supybot/conf/
+server/supybot/data/
+server/supybot/logs/
+server/supybot/supybot.conf.example.bak
+server/www/archive.txt
+server/www/status.html
+server/www/status.txt
+server/www/status.json
+server/www/status.xml

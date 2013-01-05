@@ -6,6 +6,7 @@ This directory contains the server part of the Stratum 0 Open/Close Monitor.
 * sudo
 * cron
 * nmap >= 6.00
+* avahi-utils
 
 On a recent Debian system (tested on wheezy) do the following:
 # apt-get install supybot nginx-light sudo cron nmap
@@ -80,13 +81,13 @@ Supybot will write its output to supybot/logs/messages.log.
 # chown root:root /etc/cron.d/stratummonitor
 
 7. For the detection of present entities in the hackerspace, create the files
-   /etc/stratummonitor/known-users and /etc/stratummonitor/known-mdns, and fill
+   /etc/stratummonitor/known-macs and /etc/stratummonitor/known-mdns, and fill
    them with a mapping of MAC addresses resp. mDNS hostnames (without the domain
    postfix) to IRC nick names. The file must contain one mapping per line, each
    line consists of a MAC address or hostname, the '=>' string and the nick name
    of the corresponding user. A sample of this files looks as following:
 
-   /etc/stratummonitor/known-users:
+   /etc/stratummonitor/known-macs:
      08:24:15:db:2b:56 => AcidBurn
      00:10:35:bc:a5:11 => ZeroCool
      DE:AD:BE:EF:13:37 => JRandomHacker
