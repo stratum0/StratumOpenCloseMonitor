@@ -1,7 +1,7 @@
 # vim: set syntax=crontab noet sw=2 ts=2:
 # m h  dom mon dow	user	command
 @reboot         	ircbot  supybot /home/ircbot/supybot/supybot.conf.example > /dev/null
-@reboot         	root	touch /var/run/stratummonitor-netscan
-@reboot         	root	touch /var/run/stratummonitor-mdnsscan
+@reboot         	root	touch /var/run/stratummonitor-netscan && chown ircbot:stratummonitor /var/run/stratummonitor-netscan
+@reboot         	root	touch /var/run/stratummonitor-mdnsscan && chown ircbot:stratummonitor /var/run/stratummonitor-mdnsscan
 */5 *  *   *   *	root	nmap -sn -n -PM 192.168.178.0/24 | sed -n 's/^MAC Address: \([0-9A-Fa-f:]\+\) .*$/\1/p' > /var/run/stratummonitor-netscan
 */5 *  *   *   *	root	avahi-browse -a -t | grep Workstation | awk '{print $4;}' | sort | uniq > /var/run/stratummonitor-mdnsscan

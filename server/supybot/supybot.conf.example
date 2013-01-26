@@ -665,7 +665,7 @@ supybot.directories.log: /home/ircbot/supybot/logs
 #
 # Default value:  
 ###
-supybot.plugins: Admin StratumMonitor Misc Utilities Topic Alias User Services Config Owner Channel
+supybot.plugins: Admin Config Misc Utilities Topic Alias User Services StratumMonitor Owner Channel
 
 ###
 # Determines whether this plugin is loaded by default.
@@ -692,6 +692,8 @@ supybot.plugins.Alias: True
 supybot.plugins.Alias.public: True
 supybot.plugins.Alias.aliases.auf: offen $*
 supybot.plugins.Alias.aliases.auf.locked: True
+supybot.plugins.Alias.aliases.make: echo $nick: Here, have a sandwich: https://www.google.com/images?q=sandwich
+supybot.plugins.Alias.aliases.make.locked: True
 supybot.plugins.Alias.aliases.closed: zu $*
 supybot.plugins.Alias.aliases.closed.locked: True
 supybot.plugins.Alias.aliases.zu: topic replace 2 [spaceclosed]
@@ -702,8 +704,6 @@ supybot.plugins.Alias.aliases.offen: topic replace 2 [spaceopen @1]
 supybot.plugins.Alias.aliases.offen.locked: True
 supybot.plugins.Alias.aliases.open: offen $*
 supybot.plugins.Alias.aliases.open.locked: True
-supybot.plugins.Alias.aliases.make: echo $nick: Here, have a sandwich: https://www.google.com/images?q=sandwich
-supybot.plugins.Alias.aliases.make.locked: True
 
 ###
 # Determines whether this plugin is loaded by default.

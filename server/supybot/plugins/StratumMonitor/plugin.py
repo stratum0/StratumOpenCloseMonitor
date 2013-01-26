@@ -37,6 +37,7 @@ import supybot.plugins as plugins
 import supybot.ircmsgs as ircmsgs
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
+import socket as sock
 
 class StratumMonitor(callbacks.Plugin):
   """Stratum 0 Open/Close Monitor"""
@@ -186,6 +187,20 @@ Since: {{{SINCE}}}\r
     f.close()
     self.log.info("Present MACs: %s" % repr(self.presentEntities))
 
+  def sendEventdistrPacket(self, opened):
+    ip = "192.168.178.255"
+    port = 31337
+    s = sock.socket(sock.AF_INET, sock.SOCK_DGRAM)
+    s.setsockopt(sock.SOL_SOCKET,sock.SO_BROADCAST,1)
+    packet = ""
+    if(opened):
+      packet = b"EVENTDISTRv1;SpaceOpened"
+    else:
+      packet = b"EVENTDISTRv1;SpaceClosed"
+    self.log.info("sending eventdistr packet")
+    s.sendto(packet, (ip, port))
+    s.close()
+
   def __call__(self, irc, msg):
     # only re-read the file every 60 seconds
     if self.lastCalled + 60 < int(time.time()):
@@ -261,6 +276,7 @@ Since: {{{SINCE}}}\r
     self.isOpen = True;
     self.openedBy = nick if nick else msg.nick
     self.writeFiles()
+    self.sendEventdistrPacket(True)
     irc.reply("Space ist offen (%s, %s)" %
       (self.topicTimeString(self.since), self.openedBy), prefixNick = False)
 
@@ -281,6 +297,7 @@ Since: {{{SINCE}}}\r
     self.isOpen = False;
     self.openedBy = ""
     self.writeFiles()
+    self.sendEventdistrPacket(False)
     irc.reply("Space ist zu (%s)" % self.topicTimeString(self.since),
       prefixNick = False)
 
