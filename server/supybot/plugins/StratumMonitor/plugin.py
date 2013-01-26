@@ -85,8 +85,8 @@ Since: {{{SINCE}}}\r
   "url": "https:\/\/stratum0.org",\r
   "logo": "https:\/\/stratum0.org\/mediawiki\/images\/thumb\/c\/c6\/Sanduhr-twitter-avatar-black.svg\/240px-Sanduhr-twitter-avatar-black.svg.png",\r
   "address": "Hamburger Strasse 273a, 38114 Braunschweig, Germany",\r
-  "lat": 10.5211247,\r
-  "lon": 52.2785658,\r
+  "lon": 10.5211247,\r
+  "lat": 52.2785658,\r
   "contact": {\r
     "phone": "+4953128769245",\r
     "twitter": "@stratum0",\r

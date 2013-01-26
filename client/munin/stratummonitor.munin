@@ -8,11 +8,11 @@ if [ "$1" = "autoconf" ]; then
 fi
 
 if [ "$1" = "config" ]; then
-  echo 'graph_title Stratum 0 Openness'
-  echo 'graph_args --lower-limit -0.3 --upper-limit 1.1'
+  echo 'graph_title Opening Status'
+  echo 'graph_args --lower-limit -0.1 --upper-limit 1.1'
   echo 'graph_category Stratum0'
   echo 'stratummonitor.label openness'
-  echo 'stratummonitor.info "1 if the hackerspace is open, 0 if it is closed"'
+  echo 'stratummonitor.info 1 if the hackerspace is open, 0 if it is closed'
   exit 0;
 fi;
 
