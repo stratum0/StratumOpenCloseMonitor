@@ -275,7 +275,7 @@ supybot.reply.showSimpleSyntax: False
 #
 # Default value: 
 ###
-supybot.reply.whenAddressedBy.chars: 
+supybot.reply.whenAddressedBy.chars: @
 
 ###
 # Determines what strings the bot will reply to when they are at the
@@ -704,6 +704,8 @@ supybot.plugins.Alias.aliases.offen: topic replace 2 [spaceopen @1]
 supybot.plugins.Alias.aliases.offen.locked: True
 supybot.plugins.Alias.aliases.open: offen $*
 supybot.plugins.Alias.aliases.open.locked: True
+supybot.plugins.Alias.aliases.wieder: $1 $*
+supybot.plugins.Alias.aliases.wieder.locked: False
 
 ###
 # Determines whether this plugin is loaded by default.

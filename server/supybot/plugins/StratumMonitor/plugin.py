@@ -170,10 +170,17 @@ Since: {{{SINCE}}}\r
     f = open("/var/run/stratummonitor-mdnsscan", "r")
     for line in f.readlines():
       scannedMDNS = line.strip().lower()
-      self.log.info("got mDNS hostname %s" % scannedMDNS)
-      if(scannedMDNS in knownMDNSs.keys()):
-        self.log.info("  this mDNS hostname belongs to user %s" % knownMDNSs[scannedMDNS])
-        self.presentEntities.add(knownMDNSs[scannedMDNS])
+      canonicalMDNS = scannedMDNS
+      # some avahi clients tend to prefix numbers when the hostname already
+      # exists on the network
+      if(scannedMDNS.rstrip("1234567890-") != scannedMDNS):
+        canonicalMDNS = scannedMDNS.rstrip("1234567890-")
+        self.log.info("canonicalize %s => %s" % (scannedMDNS, canonicalMDNS))
+
+      self.log.info("got mDNS hostname %s" % canonicalMDNS)
+      if(canonicalMDNS in knownMDNSs.keys()):
+        self.log.info("  this mDNS hostname belongs to user %s" % knownMDNSs[canonicalMDNS])
+        self.presentEntities.add(knownMDNSs[canonicalMDNS])
     f.close()
     self.log.info("Present mDNSs: %s" % repr(self.presentEntities))
 
