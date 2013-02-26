@@ -88,12 +88,21 @@ Since: {{{SINCE}}}\r
   "address": "Hamburger Strasse 273a, 38114 Braunschweig, Germany",\r
   "lon": 10.5211247,\r
   "lat": 52.2785658,\r
+  "location": {\r
+    "address": "Hamburger Strasse 273a, 38114 Braunschweig, Germany",\r
+    "lon": 10.5211247,\r
+    "lat": 52.2785658\r
+  },\r
   "contact": {\r
     "phone": "+4953128769245",\r
     "twitter": "@stratum0",\r
     "ml": "normalverteiler@stratum0.org",\r
+    "issue-mail": "cm9oaWViK3NwYWNlYXBpLWlzc3Vlc0Byb2hpZWIubmFtZQ==",\r
     "irc": "irc:\/\/irc.freenode.net\/#stratum0"\r
   },\r
+  "issue-report-channels": [\r
+    "issue-mail"\r
+  ],\r
   "open": {{{ISOPEN}}},\r
   "icon": {\r
     "open": "http:\/\/status.stratum0.org\/open_square.png",\r
