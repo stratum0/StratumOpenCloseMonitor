@@ -690,10 +690,16 @@ supybot.plugins.Alias: True
 # Default value: True
 ###
 supybot.plugins.Alias.public: True
+supybot.plugins.Alias.aliases.wieder: $1 $*
+supybot.plugins.Alias.aliases.wieder.locked: False
 supybot.plugins.Alias.aliases.auf: offen $*
 supybot.plugins.Alias.aliases.auf.locked: True
 supybot.plugins.Alias.aliases.make: echo $nick: Here, have a sandwich: https://www.google.com/images?q=sandwich
 supybot.plugins.Alias.aliases.make.locked: True
+supybot.plugins.Alias.aliases.neuhier: echo Neu hier? https://stratum0.org/wiki/Neu_hier
+supybot.plugins.Alias.aliases.neuhier.locked: False
+supybot.plugins.Alias.aliases.kekse: action hat kein mehl
+supybot.plugins.Alias.aliases.kekse.locked: False
 supybot.plugins.Alias.aliases.closed: zu $*
 supybot.plugins.Alias.aliases.closed.locked: True
 supybot.plugins.Alias.aliases.zu: topic replace 2 [spaceclosed]
@@ -704,8 +710,6 @@ supybot.plugins.Alias.aliases.offen: topic replace 2 [spaceopen @1]
 supybot.plugins.Alias.aliases.offen.locked: True
 supybot.plugins.Alias.aliases.open: offen $*
 supybot.plugins.Alias.aliases.open.locked: True
-supybot.plugins.Alias.aliases.wieder: $1 $*
-supybot.plugins.Alias.aliases.wieder.locked: False
 
 ###
 # Determines whether this plugin is loaded by default.
