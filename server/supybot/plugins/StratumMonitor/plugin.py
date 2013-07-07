@@ -138,6 +138,22 @@ Since: {{{SINCE}}}\r
   API_ARCHIVE_FILE = API_PATH % "archive.txt"
   API_ARCHIVE_TEMPLATE = "{{{ACTION}}}: {{{SINCE}}}\r\n"
 
+  API_LOCAL_HTML_FILE = API_PATH % "local.html"
+  API_LOCAL_HTML_TEMPLATE = """<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Stratum 0 Space Status</title>
+  <meta http-equiv="refresh" content="6" />
+</head>
+<body style="background-color:black; color:white;">
+  <div style="text-align:center">
+    <h3>{{{STATUS}}}</h3>
+    <img height="75" width="75" src="http://localhost/{{{STATUS}}}.svg" alt="{{{STATUS}}}" />
+  </div>
+</body></html>"""
+
   VERSION = "0.1"   ### Bump this for new Open/Close API versions
 
   WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
@@ -277,6 +293,7 @@ Since: {{{SINCE}}}\r
     self.writeFile(self.API_JSON_FILE, self.API_JSON_TEMPLATE)
     self.writeFile(self.API_XML_FILE, self.API_XML_TEMPLATE)
     self.writeFile(self.API_HTML_FILE, self.API_HTML_TEMPLATE)
+    self.writeFile(self.API_LOCAL_HTML_FILE, self.API_LOCAL_HTML_TEMPLATE)
     self.writeFile(self.API_ARCHIVE_FILE, self.API_ARCHIVE_TEMPLATE, True)
     r = os.system("sudo killall -HUP nginx"); # NOTE: must be in sudoers to do that!
 
