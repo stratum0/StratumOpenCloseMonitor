@@ -56,7 +56,7 @@ supybot.networks.freenode.password:
 #
 # Default value: 
 ###
-supybot.networks.freenode.servers: irc.freenode.net:6667
+supybot.networks.freenode.servers: leguin.freenode.net:6667
 
 ###
 # Determines what channels the bot will join only on freenode.
@@ -665,7 +665,7 @@ supybot.directories.log: /home/ircbot/supybot/logs
 #
 # Default value:  
 ###
-supybot.plugins: Admin Config Misc Utilities Topic Alias User Services StratumMonitor Owner Channel
+supybot.plugins: Admin StratumMonitor Misc Utilities Topic Alias User Services Config Owner Channel
 
 ###
 # Determines whether this plugin is loaded by default.
