@@ -50,8 +50,10 @@ class StratumMonitor(callbacks.Plugin):
   access_log off;
 
   location / {
-    rewrite ^/status.png$ $scheme://$http_host/{{{STATUS}}}.png redirect;
-    rewrite ^/favicon.ico$ $scheme://$http_host/{{{STATUS}}}.ico redirect;
+    rewrite ^/status.png$ https://$http_host/{{{STATUS}}}.png redirect;
+    rewrite ^/favicon.ico$ https://$http_host/{{{STATUS}}}.ico redirect;
+    #rewrite ^/status.png$ $scheme://$http_host/{{{STATUS}}}.png redirect;
+    #rewrite ^/favicon.ico$ $scheme://$http_host/{{{STATUS}}}.ico redirect;
     expires +5m;
   }
   location ~* /(open|closed)(_square)?\.(ico|png)$ {
@@ -81,35 +83,50 @@ Since: {{{SINCE}}}\r
   "since": "{{{SINCE}}}",\r
   "openedBy": "{{{OPENER}}}",\r
   \r
-  "api": "0.12",\r
+  "api": "0.13",\r
   "space": "Stratum 0",\r
-  "url": "https:\/\/stratum0.org",\r
-  "logo": "https:\/\/stratum0.org\/mediawiki\/images\/thumb\/c\/c6\/Sanduhr-twitter-avatar-black.svg\/240px-Sanduhr-twitter-avatar-black.svg.png",\r
-  "address": "Hamburger Strasse 273a, 38114 Braunschweig, Germany",\r
-  "lon": 10.5211247,\r
-  "lat": 52.2785658,\r
+  "url": "https://stratum0.org",\r
+  "logo": "https://stratum0.org/mediawiki/images/thumb/c/c6/Sanduhr-twitter-avatar-black.svg/240px-Sanduhr-twitter-avatar-black.svg.png",\r
   "location": {\r
-    "address": "Hamburger Strasse 273a, 38114 Braunschweig, Germany",\r
+    "address": "Hamburger Strasse 273a, Haus A2, 38114 Braunschweig, Germany",\r
     "lon": 10.5211247,\r
     "lat": 52.2785658\r
   },\r
   "contact": {\r
-    "phone": "+4953128769245",\r
+    "phone": "+49 531 287 69 245",\r
     "twitter": "@stratum0",\r
+    "email": "kontakt@stratum0.org",\r
     "ml": "normalverteiler@stratum0.org",\r
-    "issue-mail": "cm9oaWViK3NwYWNlYXBpLWlzc3Vlc0Byb2hpZWIubmFtZQ==",\r
-    "irc": "irc:\/\/irc.freenode.net\/#stratum0"\r
+    "issue_mail": "cm9oaWViK3NwYWNlYXBpLWlzc3Vlc0Byb2hpZWIubmFtZQ==",\r
+    "irc": "irc://irc.freenode.net/#stratum0",\r
+    "foursquare": "4f243fd0e4b0b653a35e3ae4"\r
   },\r
-  "issue-report-channels": [\r
-    "issue-mail"\r
+  "issue_report_channels": [\r
+    "issue_mail"\r
   ],\r
-  "open": {{{ISOPEN}}},\r
-  "icon": {\r
-    "open": "http:\/\/status.stratum0.org\/open_square.png",\r
-    "closed": "http:\/\/status.stratum0.org\/closed_square.png"\r
+  "state": {\r
+    "open": {{{ISOPEN}}},\r
+    "icon": {\r
+      "open": "http://status.stratum0.org/open_square.png",\r
+      "closed": "http://status.stratum0.org/closed_square.png"\r
+    },\r
+    "trigger_person": "{{{OPENER}}}",
+    "lastchange": {{{SINCE_EPOCH}}}\r
   },\r
-  "status": "{{{STATUS}}}",\r
-  "lastchange": {{{SINCE_EPOCH}}}\r
+  "feeds": {\r
+    "blog": {\r
+      "type": "atom",\r
+      "url": "https://stratum0.org/blog/atom.xml"\r
+    },\r
+    "wiki": {\r
+      "type": "atom",\r
+      "url": "https://stratum0.org/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=atom"\r
+    },\r
+    "calendar": {\r
+      "type": "ical",\r
+      "url": "https://stratum0.org/calendar/events.ics"\r
+    }\r
+  }\r
 }\r
 """
   API_XML_FILE = API_PATH % "status.xml"
@@ -138,21 +155,9 @@ Since: {{{SINCE}}}\r
   API_ARCHIVE_FILE = API_PATH % "archive.txt"
   API_ARCHIVE_TEMPLATE = "{{{ACTION}}}: {{{SINCE}}}\r\n"
 
-  API_LOCAL_HTML_FILE = API_PATH % "local.html"
-  API_LOCAL_HTML_TEMPLATE = """<?xml version="1.0" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <title>Stratum 0 Space Status</title>
-  <meta http-equiv="refresh" content="6" />
-</head>
-<body style="background-color:black; color:white;">
-  <div style="text-align:center">
-    <h3>{{{STATUS}}}</h3>
-    <img height="75" width="75" src="http://localhost/{{{STATUS}}}.svg" alt="{{{STATUS}}}" />
-  </div>
-</body></html>"""
+  LOCAL_HTML_FILE = API_PATH % "status-local.html"
+  LOCAL_HTML_OPEN_FILE = API_PATH % "open-local.html"
+  LOCAL_HTML_CLOSED_FILE = API_PATH % "closed-local.html"
 
   VERSION = "0.1"   ### Bump this for new Open/Close API versions
 
@@ -293,8 +298,15 @@ Since: {{{SINCE}}}\r
     self.writeFile(self.API_JSON_FILE, self.API_JSON_TEMPLATE)
     self.writeFile(self.API_XML_FILE, self.API_XML_TEMPLATE)
     self.writeFile(self.API_HTML_FILE, self.API_HTML_TEMPLATE)
-    self.writeFile(self.API_LOCAL_HTML_FILE, self.API_LOCAL_HTML_TEMPLATE)
     self.writeFile(self.API_ARCHIVE_FILE, self.API_ARCHIVE_TEMPLATE, True)
+    
+    if(self.isOpen):
+      r = os.system("rm %s; ln -s %s %s" % (self.LOCAL_HTML_FILE,
+        self.LOCAL_HTML_OPEN_FILE, self.LOCAL_HTML_FILE))
+    else:
+      r = os.system("rm %s; ln -s %s %s" % (self.LOCAL_HTML_FILE,
+        self.LOCAL_HTML_CLOSED_FILE, self.LOCAL_HTML_FILE))
+    
     r = os.system("sudo killall -HUP nginx"); # NOTE: must be in sudoers to do that!
 
   def spaceopen(self, irc, msg, args, nick):

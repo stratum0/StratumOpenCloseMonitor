@@ -10,3 +10,4 @@ server/www/status.html
 server/www/status.txt
 server/www/status.json
 server/www/status.xml
+server/www/status-local.html
