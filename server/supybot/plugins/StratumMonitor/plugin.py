@@ -98,7 +98,7 @@ Since: {{{SINCE}}}\r
     "email": "kontakt@stratum0.org",\r
     "ml": "normalverteiler@stratum0.org",\r
     "issue_mail": "cm9oaWViK3NwYWNlYXBpLWlzc3Vlc0Byb2hpZWIubmFtZQ==",\r
-    "irc": "irc://irc.freenode.net/#stratum0",\r
+    "irc": "irc://chat.freenode.net/#stratum0",\r
     "foursquare": "4f243fd0e4b0b653a35e3ae4"\r
   },\r
   "issue_report_channels": [\r
