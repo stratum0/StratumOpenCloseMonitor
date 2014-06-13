@@ -38,6 +38,7 @@ import supybot.ircmsgs as ircmsgs
 import supybot.ircutils as ircutils
 import supybot.callbacks as callbacks
 import socket as sock
+import re
 
 class StratumMonitor(callbacks.Plugin):
   """Stratum 0 Open/Close Monitor"""
@@ -174,60 +175,99 @@ Since: {{{SINCE}}}\r
     self.lastCalled = int(time.time())
     self.lastBroadcast = 0
 
-    self.readMACs()
+    #self.readMACs()
 
-  def readMACs(self):
-    knownMDNSs = {};
-    knownMACs = {};
+  def parseKnownFile(self, filename):
+    known = {}
+    f = open(filename, "r")
+    for line in f:
+      key, nicks = line.split("=>", 1)
+      key = key.strip().lower()
+      if key not in known:
+        known[key] = []
+      for nick in nicks.split(","):
+        known[key].append(nick.strip().lower())
+    f.close()
+    return known
+  
+  def loadScanFile(self, filename, known):
+    f = open(filename, "r")
+    online = set()
+    for line in f:
+      scanned = line.strip().lower()
+      # some  avahi clients tend to prefix numbers when the hostname already
+      # exists on the network
+      scannedCanonical = scanned.rstrip("0123456789").rstrip("-")
+      if scanned in known:
+        online |= set(known[scanned])
+      elif scannedCanonical in known:
+        online |= set(known[scannedCanonical])
+    f.close()
+    return online
+    
+  def readMACs(self, channel):
+    knownMDNSs = self.parseKnownFile("/etc/stratummonitor/known-mdns")
+    knownMACs = self.parseKnownFile("/etc/stratummonitor/known-macs")
     self.presentEntities = ircutils.IrcSet()
 
-    f = open("/etc/stratummonitor/known-mdns", "r")
-    for line in f.readlines():
-      parts = line.split("=>")
-      if(len(parts) == 2):
-        knownMDNSs[parts[0].strip().lower()] = parts[1].strip()
-    f.close()
-    self.log.info("Known mDNS hostnames: %s" % repr(knownMDNSs))
+    online = self.loadScanFile("/var/run/stratummonitor-netscan", knownMACs)
+    online |= self.loadScanFile("/var/run/stratummonitor-mdnsscan", knownMDNSs)
+    for nick in channel.users:
+      nick = nick.lowered
+      for nickOnline in online:
+        if nick == nickOnline:
+          self.presentEntities.add(nick)
+        elif (nickOnline.startswith("^") and nickOnline.endswith("$") and
+          re.match(nickOnline, nick)):
+          self.presentEntities.add(nick)
+    #f = open("/etc/stratummonitor/known-mdns", "r")
+    #for line in f.readlines():
+    #  parts = line.split("=>")
+    #  if(len(parts) == 2):
+    #    knownMDNSs[parts[0].strip().lower()] = parts[1].strip()
+    #f.close()
+    #self.log.info("Known mDNS hostnames: %s" % repr(knownMDNSs))
 
-    f = open("/etc/stratummonitor/known-macs", "r")
-    for line in f.readlines():
-      parts = line.split("=>")
-      if(len(parts) == 2):
-        knownMACs[parts[0].strip().lower()] = parts[1].strip()
-    f.close()
-    self.log.info("Known MACs: %s" % repr(knownMACs))
+    #f = open("/etc/stratummonitor/known-macs", "r")
+    #for line in f.readlines():
+    #  parts = line.split("=>")
+    #  if(len(parts) == 2):
+    #    knownMACs[parts[0].strip().lower()] = parts[1].strip()
+    #f.close()
+    #self.log.info("Known MACs: %s" % repr(knownMACs))
 
-    f = open("/var/run/stratummonitor-mdnsscan", "r")
-    for line in f.readlines():
-      scannedMDNS = line.strip().lower()
-      mdns = ""
+    #f = open("/var/run/stratummonitor-mdnsscan", "r")
+    #for line in f.readlines():
+    #  scannedMDNS = line.strip().lower()
+    #  mdns = ""
 
-      # some avahi clients tend to prefix numbers when the hostname already
-      # exists on the network
-      canonicalMDNS = scannedMDNS.rstrip("1234567890").rstrip("-")
-      if(scannedMDNS in knownMDNSs.keys()):
-        mdns = scannedMDNS
-      elif(canonicalMDNS in knownMDNSs.keys()):
-        self.log.info("canonicalize %s => %s" % (scannedMDNS, canonicalMDNS))
-        mdns = canonicalMDNS
+    #  # some avahi clients tend to prefix numbers when the hostname already
+    #  # exists on the network
+    #  canonicalMDNS = scannedMDNS.rstrip("1234567890").rstrip("-")
+    #  if(scannedMDNS in knownMDNSs.keys()):
+    #    mdns = scannedMDNS
+    #  elif(canonicalMDNS in knownMDNSs.keys()):
+    #    #self.log.info("canonicalize %s => %s" % (scannedMDNS, canonicalMDNS))
+    #    mdns = canonicalMDNS
 
-      if(mdns != ""):
-        self.log.info("got mDNS hostname %s" % mdns)
-        self.log.info("  this mDNS hostname belongs to user %s" % knownMDNSs[mdns])
-        self.presentEntities.add(knownMDNSs[mdns])
+    #  if(mdns != ""):
+    #    #self.log.info("got mDNS hostname %s" % mdns)
+    #    #self.log.info("  this mDNS hostname belongs to user %s" % knownMDNSs[mdns])
+    #    self.presentEntities.add(knownMDNSs[mdns])
 
-    f.close()
-    self.log.info("Present mDNSs: %s" % repr(self.presentEntities))
+    #f.close()
+    #self.log.info("Present mDNSs: %s" % repr(self.presentEntities))
 
-    f = open("/var/run/stratummonitor-netscan", "r")
-    for line in f.readlines():
-      scannedMAC = line.strip().lower()
-      self.log.info("got mac address %s" % scannedMAC)
-      if(scannedMAC in knownMACs.keys()):
-        self.log.info("  this mac address belongs to user %s" % knownMACs[scannedMAC])
-        self.presentEntities.add(knownMACs[scannedMAC])
-    f.close()
-    self.log.info("Present MACs: %s" % repr(self.presentEntities))
+    #f = open("/var/run/stratummonitor-netscan", "r")
+    #for line in f.readlines():
+    #  scannedMAC = line.strip().lower()
+    #  #self.log.info("got mac address %s" % scannedMAC)
+    #  if(scannedMAC in knownMACs.keys()):
+    #    #self.log.info("  this mac address belongs to user %s" % knownMACs[scannedMAC])
+    #    self.presentEntities.add(knownMACs[scannedMAC])
+    #f.close()
+    #self.log.info("Present MACs: %s" % repr(self.presentEntities))
+    
 
   def sendEventdistrPacket(self, opened):
     ip = "192.168.179.255"
@@ -239,28 +279,29 @@ Since: {{{SINCE}}}\r
       packet = b"EVENTDISTRv1;SpaceOpened"
     else:
       packet = b"EVENTDISTRv1;SpaceClosed"
-    self.log.info("sending eventdistr packet")
+    #self.log.info("sending eventdistr packet")
     s.sendto(packet, (ip, port))
     s.close()
-
+  
   def __call__(self, irc, msg):
     # only re-read the file every 60 seconds
     if self.lastCalled + 60 < int(time.time()):
-      self.readMACs()
-      self.lastCalled = int(time.time())
 
       chan = msg.args[0];      # FIXME: change channel!
       if(ircutils.isChannel(chan) and chan == "#stratum0" and
          chan in irc.state.channels.keys()):
-        self.log.info("voices:  %s" % repr(irc.state.channels[chan].voices))
-        self.log.info("present: %s" % repr(self.presentEntities))
-        self.log.info("devoice  %s" % repr(irc.state.channels[chan].voices - self.presentEntities))
-        self.log.info("voice:   %s\n" % repr(self.presentEntities - irc.state.channels[chan].voices))
+        #self.log.info("voices:  %s" % repr(irc.state.channels[chan].voices))
+        #self.log.info("present: %s" % repr(self.presentEntities))
+        #self.log.info("devoice  %s" % repr(irc.state.channels[chan].voices - self.presentEntities))
+        #self.log.info("voice:   %s\n" % repr(self.presentEntities - irc.state.channels[chan].voices))
+        stratum0chan = irc.state.channels[chan]
+        self.readMACs(stratum0chan)
+        self.lastCalled = int(time.time())
 
-        for nick in (irc.state.channels[chan].voices - self.presentEntities):
+        for nick in (stratum0chan.voices - self.presentEntities):
           irc.queueMsg(ircmsgs.devoice(chan, nick))
 
-        for nick in (self.presentEntities - irc.state.channels[chan].voices):
+        for nick in (self.presentEntities - stratum0chan.voices):
           irc.queueMsg(ircmsgs.voice(chan, nick))
 
   def presentEntities(self, irc, msg, args):
@@ -288,7 +329,7 @@ Since: {{{SINCE}}}\r
   def writeFile(self, filename, template, append=False):
     mode = "a" if append else "w"
     with open(filename, mode) as f:
-      self.log.info("writing to file %s" % filename)
+      #self.log.info("writing to file %s" % filename)
       t = self.replaceVariables(template)
       f.write(t)
 
@@ -367,8 +408,8 @@ Since: {{{SINCE}}}\r
     """
     now = int(time.time())
     #now = int(time.mktime(datetime.now().timetuple()))
-    self.log.info("last: %d" % self.lastBroadcast);
-    self.log.info("now:  %d" % now);
+    #self.log.info("last: %d" % self.lastBroadcast);
+    #self.log.info("now:  %d" % now);
     if(now < 60*3 + self.lastBroadcast):
       irc.reply("Sorry, flood limit of 3 minutes.")
     else:
