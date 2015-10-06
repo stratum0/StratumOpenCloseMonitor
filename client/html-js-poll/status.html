@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Stratum 0 Space Status</title>
+		<style type="text/css">
+			body {
+				font-size: 16pt;
+				font-family: sans-serif;
+				background-color: black;
+				color: white;
+				overflow: hidden;
+				cursor: none;
+			}
+		</style>
+		<script src="jquery.min.js"></script>
+		<script src="sprintf.js"></script>
+		<script type='text/javascript'>
+			function formatDate(date) {
+				days = [ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" ];
+				return sprintf("%s, %d-%02d-%02d, %02d:%02d",
+						days[date.getDay()],
+						date.getFullYear(),
+						date.getMonth(),
+						date.getDate(),
+						date.getHours(),
+						date.getMinutes()
+					);
+			}
+			function setOpen(text) {
+				$("#text").html("Undefined status" + (text ? " : " + text : ""));
+				$("#icon").prop("src", "undefined.svg");
+			}
+			function setClosed(since, trigger_person) {
+				$("#text").html("Closed since " + formatDate(since) + 
+						(trigger_person ? " (" + trigger_person + ")" : ""));
+				$("#icon").prop("src", "closed.svg");
+			}
+			function setOpen(since, trigger_person) {
+				$("#text").html("Open since " + formatDate(since) +
+						(trigger_person ? " (" + trigger_person + ")" : ""));
+				$("#icon").prop("src", "open.svg");
+			}
+			function fetchStatus() {
+				$.getJSON("http://status.stratum0.org/status.json", function (data) {
+					if(data.state !== undefined &&
+							data.state.lastchange !== undefined &&
+							data.state.open !== undefined &&
+							data.state.trigger_person !== undefined) {
+						since = new Date(data.state.lastchange * 1000);
+						if(data.state.open === true) {
+							setOpen(since, data.state.trigger_person);
+						} else {
+							setClosed(since, data.state.trigger_person);
+						}
+					} else {
+						setError("Unable to parse JSON");
+					}
+				});
+			}
+		</script>
+	</head>
+	<body onload='fetchStatus(); window.setInterval(fetchStatus, 5000)'>
+		<div style='text-align:center'>
+			<img id='icon' src='undefined.svg' style='width:64px;height=64px' />
+			<p id='text'>Undefined status</p>
+		</div>
+	</body>
+</html>
+
