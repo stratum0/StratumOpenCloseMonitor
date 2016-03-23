@@ -50,10 +50,8 @@ class StratumMonitor(callbacks.Plugin):
   access_log off;
 
   location / {
-    rewrite ^/status.png$ https://$http_host/{{{STATUS}}}.png redirect;
-    rewrite ^/favicon.ico$ https://$http_host/{{{STATUS}}}.ico redirect;
-    #rewrite ^/status.png$ $scheme://$http_host/{{{STATUS}}}.png redirect;
-    #rewrite ^/favicon.ico$ $scheme://$http_host/{{{STATUS}}}.ico redirect;
+    rewrite ^/status.png$ https://stratum0.org/status/{{{STATUS}}}.png redirect;
+    rewrite ^/favicon.ico$ https://stratum0.org/status/{{{STATUS}}}.ico redirect;
     expires +5m;
   }
   location ~* /(open|closed)(_square)?\.(ico|png)$ {
@@ -62,6 +60,9 @@ class StratumMonitor(callbacks.Plugin):
   location ~* /status.json {
     expires +5m;
     add_header Access-Control-Allow-Origin *;
+  }
+  location /update {
+    proxy_pass http://localhost:8766;
   }
 }
 """
@@ -105,6 +106,8 @@ Since: {{{SINCE}}}\r
     "issue_mail"\r
   ],\r
   "state": {\r
+    "ext_since": {{{SINCE_EPOCH}}},\r
+    "lastchange": {{{LASTCHANGE_EPOCH}}},\r
     "open": {{{ISOPEN}}},\r
     "icon": {\r
       "open": "http://status.stratum0.org/open_square.png",\r
@@ -171,6 +174,7 @@ Since: {{{SINCE}}}\r
     self.openedBy = ""
     self.since = datetime.now()
     self.presentEntities = None
+    self.lastchange = datetime.now()
     self.lastCalled = int(time.time())
     self.lastBroadcast = 0
 
@@ -279,6 +283,8 @@ Since: {{{SINCE}}}\r
     text = text.replace("{{{SINCE}}}", self.since.isoformat())
     text = text.replace("{{{SINCE_EPOCH}}}",
       str(int(time.mktime(self.since.timetuple()))))
+    text = text.replace("{{{LASTCHANGE_EPOCH}}}",
+      str(int(time.mktime(self.lastchange.timetuple()))))
     text = text.replace("{{{ISOPEN}}}", "true" if self.isOpen else "false")
     text = text.replace("{{{STATUS}}}", "open" if self.isOpen else "closed")
     text = text.replace("{{{ACTION}}}", "Opened" if self.isOpen else "Closed")
@@ -323,6 +329,8 @@ Since: {{{SINCE}}}\r
     empty, the nick of the caller is used instead.
     """
     self.since = datetime.now()
+    if not self.isOpen:
+      self.lastchange = datetime.now()
     self.isOpen = True;
     self.openedBy = nick if nick else msg.nick
     self.writeFiles()
@@ -344,6 +352,8 @@ Since: {{{SINCE}}}\r
     the channel topic.
     """
     self.since = datetime.now()
+    if self.isOpen:
+      self.lastchange = datetime.now()
     self.isOpen = False;
     self.openedBy = ""
     self.writeFiles()
