@@ -21,7 +21,7 @@
 				return sprintf("%s, %d-%02d-%02d, %02d:%02d",
 						days[date.getDay()],
 						date.getFullYear(),
-						date.getMonth(),
+						date.getMonth() + 1, // 0-based
 						date.getDate(),
 						date.getHours(),
 						date.getMinutes()
