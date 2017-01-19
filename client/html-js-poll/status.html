@@ -42,7 +42,7 @@
 				$("#icon").prop("src", "open.svg");
 			}
 			function fetchStatus() {
-				$.getJSON("http://status.stratum0.org/status.json", function (data) {
+				$.getJSON("https://status.stratum0.org/status.json", function (data) {
 					if(data.state !== undefined &&
 							data.state.lastchange !== undefined &&
 							data.state.open !== undefined &&
