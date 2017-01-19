@@ -286,7 +286,7 @@ supybot.reply.whenAddressedBy.chars: @
 #
 # Default value:  
 ###
-supybot.reply.whenAddressedBy.strings: sudo mach
+supybot.reply.whenAddressedBy.strings: sudo mach Sudo Mach
 
 ###
 # Determines whether the bot will reply when people address it by its
