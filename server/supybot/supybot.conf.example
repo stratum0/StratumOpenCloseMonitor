@@ -696,6 +696,8 @@ supybot.plugins.Alias.aliases.auf: offen $*
 supybot.plugins.Alias.aliases.auf.locked: True
 supybot.plugins.Alias.aliases.make: echo $nick: Here, have a sandwich: https://www.google.com/images?q=sandwich
 supybot.plugins.Alias.aliases.make.locked: True
+supybot.plugins.Alias.aliases.space: offen $*
+supybot.plugins.Alias.aliases.space.locked: False
 supybot.plugins.Alias.aliases.neuhier: echo Neu hier? https://stratum0.org/wiki/Neu_hier
 supybot.plugins.Alias.aliases.neuhier.locked: False
 supybot.plugins.Alias.aliases.kekse: action hat kein mehl
