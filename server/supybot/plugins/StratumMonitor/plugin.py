@@ -1,4 +1,5 @@
 ###
+# vim: set fileencoding=utf-8
 # Copyright (c) 2012, Roland Hieber
 # All rights reserved.
 #
@@ -151,7 +152,9 @@ Since: {{{SINCE}}}\r
   <h1>Stratum 0 Space Status</h1>
   <img src="//status.stratum0.org/status.png" alt="{{{STATUS}}}" />
   <p>{{{ACTION}}} since {{{SINCE}}}</p>
-  <p><a href="https://stratum0.org/wiki/Open/Close-Monitor">More information</a>
+  <p><a href="https://stratum0.org/wiki/Open/Close-Monitor">More information</a></p>
+  <p><b>Please follow the <a href="https://stratum0.org/blog/posts/2020/06/23/spaceoeffnung/">current
+    COVID-19 guidelines</a>!</b></p>
   </p>
 </body></html>"""
 
@@ -335,8 +338,8 @@ Since: {{{SINCE}}}\r
     self.openedBy = nick if nick else msg.nick
     self.writeFiles()
     self.sendEventdistrPacket(True)
-    irc.reply("Space ist offen (%s, %s)" %
-      (self.topicTimeString(self.since), self.openedBy), prefixNick = False)
+    irc.reply((u"Space ist offen für Mitglieder (%s, %s)" %
+      (self.topicTimeString(self.since), self.openedBy)).encode("utf-8"), prefixNick = False)
 
   spaceopen = wrap(spaceopen, [optional('text')])
 
@@ -365,7 +368,7 @@ Since: {{{SINCE}}}\r
 
   def spacestatus(self, irc, msg, args):
     if(self.isOpen):
-      irc.reply("Space ist offen (%s)" % self.topicTimeString(self.since))
+      irc.reply((u"Space ist offen für Mitglieder (%s)" % self.topicTimeString(self.since)).encode("utf-8"))
     else:
       irc.reply("Space ist zu (%s)" % self.topicTimeString(self.since))
 
