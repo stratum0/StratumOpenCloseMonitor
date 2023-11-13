@@ -95,13 +95,12 @@ Since: {{{SINCE}}}\r
     "lat": 52.2785658\r
   },\r
   "contact": {\r
-    "phone": "+49 531 287 69 245",\r
-    "twitter": "@stratum0",\r
     "email": "kontakt@stratum0.org",\r
     "ml": "normalverteiler@stratum0.org",\r
     "issue_mail": "cm9oaWViK3NwYWNlYXBpLWlzc3Vlc0Byb2hpZWIubmFtZQ==",\r
     "irc": "ircs://irc.libera.net/#stratum0",\r
-    "foursquare": "4f243fd0e4b0b653a35e3ae4"\r
+    "mastodon": "@stratum0@chaos.social",\r
+    "matrix": "#stratum0:stratum0.org"\r
   },\r
   "issue_report_channels": [\r
     "issue_mail"\r
