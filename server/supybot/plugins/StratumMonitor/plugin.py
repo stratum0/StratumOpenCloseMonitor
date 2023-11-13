@@ -110,8 +110,8 @@ Since: {{{SINCE}}}\r
     "lastchange": {{{LASTCHANGE_EPOCH}}},\r
     "open": {{{ISOPEN}}},\r
     "icon": {\r
-      "open": "http://status.stratum0.org/open_square.png",\r
-      "closed": "http://status.stratum0.org/closed_square.png"\r
+      "open": "https://status.stratum0.org/open_square.png",\r
+      "closed": "https://status.stratum0.org/closed_square.png"\r
     },\r
     "trigger_person": "{{{OPENER}}}",
     "lastchange": {{{SINCE_EPOCH}}}\r
