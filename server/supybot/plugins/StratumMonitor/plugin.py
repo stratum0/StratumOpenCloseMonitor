@@ -127,7 +127,7 @@ Since: {{{SINCE}}}\r
     },\r
     "calendar": {\r
       "type": "ical",\r
-      "url": "https://stratum0.org/kalendar/events.ics"\r
+      "url": "https://stratum0.org/kalender/events.ics"\r
     }\r
   }\r
 }\r
