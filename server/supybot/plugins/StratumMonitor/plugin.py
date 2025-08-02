@@ -53,6 +53,7 @@ server {
 
   location / {
     rewrite ^/status.png$ https://stratum0.org/status/{{{STATUS}}}.png redirect;
+    rewrite ^/status_square.png$ https://stratum0.org/status/{{{STATUS}}}_square.png redirect;
     rewrite ^/favicon.ico$ https://stratum0.org/status/{{{STATUS}}}.ico redirect;
     expires +5m;
   }
